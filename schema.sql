@@ -18,7 +18,7 @@ CREATE TABLE account(
 
 CREATE TABLE bank_transaction(
   transaction_id INTEGER PRIMARY KEY ,
-  transaction_type VARCHAR(180) CHECK(transaction_type IN ("deposit","withdrawl","transfert","payment")),
+  transaction_type VARCHAR(180) CHECK(transaction_type IN ("deposit","withdrawal","transfer","payment")),
   transaction_date DATE NOT NULL ,
   transaction_time TIME NOT NULL ,
   transaction_location VARCHAR(50) NOT NULL,
