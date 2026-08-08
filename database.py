@@ -18,6 +18,9 @@ def initializes_customers(customer):
     customer["city"] = fake.city()
     customer["postal_code"] = fake.postcode()
     customer["country"] = fake.country()
+    return customer
+
+
 
 def add_one_customers(customer):
     """
@@ -41,6 +44,8 @@ def add_one_customers(customer):
     cursor.execute(query, values)
     connexion.commit()
     connexion.close()
+    return cursor.lastrowid
+
 
 
 def generate_amount():
@@ -49,7 +54,7 @@ def generate_amount():
     return account_balance
 
 
-def add_account_amount(customer_id):
+def create_account_for_customer(customer_id):
     """Insert an account amount into the database."""
     client_id = customer_id
     connexion = sqlite3.connect("shieldbank.db")
@@ -62,28 +67,31 @@ def add_account_amount(customer_id):
     cursor.execute(query, values)
     connexion.commit()
     connexion.close()
-
+    return cursor.lastrowid
 
 
 def generate_bank_transaction(transaction):
     """Generates a random type of transaction.
        :param transaction: A dictionary that will hold the transaction's attributes
     """
-    the_type_of_transaction = ["deposit","withdrawal","transfer","payment"]
+    the_type_of_transaction = ["deposit","withdrawal","transfer","payment","contactless"]
+    transaction["transaction_amount"] = round(random.uniform(1.00, 5000.00),2)
     transaction["transaction_type"] = random.choice(the_type_of_transaction)
     transaction["transaction_date"] = str(fake.date_between(start_date="-1y", end_date="today"))
     transaction["transaction_time"] = fake.time()
     transaction["transaction_location"] = fake.city()
+    return transaction
 
 
 
-def add_bank_transaction(transaction, account_id):
+def insert_bank_transaction(transaction, account_id):
     """insert a bank_transaction type into the database."""
     connexion = sqlite3.connect("shieldbank.db")
     cursor = connexion.cursor()
-    query = """INSERT INTO bank_transaction (transaction_type, transaction_date, transaction_time, transaction_location, account_id)VALUES (?, ?, ?, ?, ?);"""
-    values = (transaction["transaction_type"], transaction["transaction_date"], transaction["transaction_time"], transaction["transaction_location"], account_id )
+    query = """INSERT INTO bank_transaction (transaction_type,transaction_amount, transaction_date, transaction_time, transaction_location, account_id)VALUES (?, ?, ?, ?, ?, ?);"""
+    values = (transaction["transaction_type"], transaction["transaction_amount"],transaction["transaction_date"], transaction["transaction_time"], transaction["transaction_location"], account_id )
     cursor.execute(query, values)
     connexion.commit()
     connexion.close()
+    return cursor.lastrowid
 
