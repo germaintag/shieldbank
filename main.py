@@ -9,7 +9,7 @@ from database import (
 
 fake = Faker()
 # Prompt user for the number of customer profiles to generate
-number_of_customer = int(input("How many customer do you want to add to the database"))
+number_of_customer = int(input("How many customer do you want to add to the database: "))
 # Populate database with linked Customer -> Account -> Transaction entities
 for i in range(number_of_customer):
     #Generate and persist new customer profile

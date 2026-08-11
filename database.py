@@ -50,7 +50,7 @@ def add_one_customers(customer):
 
 def generate_amount():
     """Generates a single random account balance"""
-    account_balance = fake.pydecimal(left_digits = 4, right_digits = 2, positive=True)
+    account_balance = float(fake.pydecimal(left_digits = 4, right_digits = 2, positive=True))
     return account_balance
 
 
