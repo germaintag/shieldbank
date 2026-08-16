@@ -1,4 +1,5 @@
 import sqlite3
+from database import (add_alert,get_alerts_report)
 
 def get_all_transactions():
     """Fetches all transactions from the database."""
@@ -31,13 +32,13 @@ def get_all_transactions():
 
 def check_insufficient_funds(transaction):
     """Checks if the transaction amount exceeds the available account balance."""
-    #1 If it's a deposit, no alert
+    #1-If it's a deposit, no alert
     if transaction["transaction_type"] == "deposit":
         return False
-    #2 If the amount is greater than the balance, trigger alert
+    #2-If the amount is greater than the balance, trigger alert
     if transaction["transaction_amount"] > transaction["account_balance"]:
         return True
-    #3 Otherwise (amount <= balance), everything is fine
+    #3-Otherwise (amount <= balance), everything is fine
     else:
         return False
 
@@ -54,4 +55,36 @@ def check_suspicious_hours(transaction):
     return "01:00:00" <= transaction["transaction_time"] <= "05:00:00"
 
 def run_fraud_detection():
-    """Fetches all transactions and runs them through each fraud detection rule."""
+    """Fetches all transactions, checks fraud rules, and inserts detected alerts into the alert table."""
+    transactions = get_all_transactions()
+    for transaction in transactions:
+        if check_insufficient_funds(transaction) :
+            the_alert_type = "insufficient_funds"
+            add_alert(transaction, the_alert_type)
+        if check_contactless_limit(transaction) :
+            the_alert_type = "contactless_limit_exceeded"
+            add_alert(transaction, the_alert_type)
+        if check_high_amount(transaction) :
+            the_alert_type = "high_amount"
+            add_alert(transaction, the_alert_type)
+        if check_suspicious_hours(transaction) :
+            the_alert_type = "suspicious_hours"
+            add_alert(transaction, the_alert_type)
+
+def display_fraud_report():
+    """Display alerts in the terminal"""
+    alerts = get_alerts_report()
+    print("--- Fraud Alerts Report (", len(alerts), "found ) ---")
+    for alert in alerts:
+        print("Alert ID :", alert["alert_id"])
+        print("Type :", alert["alert_type"])
+        print("Customer :", alert["forename"], alert["surname"])
+        print("Amount :", alert["transaction_amount"], "EUR")
+        print("Date :", alert["transaction_date"], alert["transaction_time"])
+        print("Location :", alert["transaction_location"])
+        print("---")
+
+#Run fraud detection and display the report
+run_fraud_detection()
+display_fraud_report()
+

@@ -95,3 +95,48 @@ def insert_bank_transaction(transaction, account_id):
     connexion.close()
     return cursor.lastrowid
 
+def add_alert(transaction,alert_type):
+    """insert a bank_transaction type as an alert in  the database."""
+    connexion = sqlite3.connect("shieldbank.db")
+    cursor = connexion.cursor()
+    query = """INSERT INTO alert (alert_type, transaction_id) VALUES (?, ?);"""
+    values = (alert_type, transaction["transaction_id"])
+    cursor.execute(query, values)
+    connexion.commit()
+    connexion.close()
+    return cursor.lastrowid
+
+def get_alerts_report():
+    """Fetches all recorded fraud alerts joined with transaction,account, and customer details. """
+    connexion = sqlite3.connect("shieldbank.db")
+    connexion.row_factory = sqlite3.Row
+    cursor = connexion.cursor()
+    query = """
+    SELECT 
+        alert.alert_id,
+        alert.alert_type,
+        bank_transaction.transaction_id,
+        bank_transaction.transaction_type,
+        bank_transaction.transaction_amount,
+        bank_transaction.transaction_date,
+        bank_transaction.transaction_time,
+        bank_transaction.transaction_location,
+        account.account_id,
+        account.account_balance,
+        customers.surname,
+        customers.forename
+    FROM alert
+    INNER JOIN bank_transaction ON alert.transaction_id = bank_transaction.transaction_id
+    INNER JOIN account ON bank_transaction.account_id = account.account_id
+    INNER JOIN customers ON account.customer_id = customers.customer_id
+    ORDER BY alert.alert_id ASC;
+    """
+    cursor.execute(query)
+    #Convert rows to dictionaries step by step
+    rows = cursor.fetchall()
+    alerts = []
+    for row in rows:
+        alert_dict = dict(row)
+        alerts.append(alert_dict)
+    connexion.close()
+    return alerts
